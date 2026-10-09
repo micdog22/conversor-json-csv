@@ -1,4 +1,4 @@
-# Conversor JSON ↔ CSV — converta dados no navegador, sem enviar nada (HTML + JS)
+# Conversor JSON ↔ CSV: converta dados no navegador, sem enviar nada (HTML + JS)
 
 Ferramenta para transformar JSON em CSV e CSV em JSON sem subir arquivo para site nenhum: tudo roda no seu navegador. Pensada para o dia a dia de quem lida com planilhas e APIs no Brasil: entende o ponto e vírgula e a vírgula decimal do Excel em português, objetos aninhados, JSON Lines e arquivos antigos salvos em Windows-1252.
 
@@ -82,4 +82,4 @@ Issues e pull requests são bem-vindos.
 
 ## Licença
 
-MIT — veja [LICENSE](LICENSE).
+MIT. Veja [LICENSE](LICENSE).
