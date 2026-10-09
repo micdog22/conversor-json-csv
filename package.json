@@ -1,0 +1,11 @@
+{
+  "name": "conversor-json-csv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Converta JSON em CSV e CSV em JSON direto no navegador, sem enviar nada para servidor nenhum.",
+  "type": "module",
+  "scripts": { "test": "node --test" },
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/micdog22/conversor-json-csv.git" },
+  "homepage": "https://micdog22.github.io/conversor-json-csv/"
+}

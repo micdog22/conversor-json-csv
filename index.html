@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conversor JSON ↔ CSV — converta dados no navegador, sem enviar nada</title>
+  <meta name="description" content="Converta JSON em CSV e CSV em JSON direto no navegador: objetos aninhados, JSON Lines, ponto e vírgula do Excel, números no formato brasileiro e prévia em tabela.">
+  <meta name="theme-color" content="#15803d">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔁</text></svg>">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <h1>Conversor JSON ↔ CSV</h1>
+    <p class="lead">Converta dados entre JSON e CSV no navegador, sem enviar nada para servidor nenhum.</p>
+  </header>
+
+  <main>
+    <details class="card options" id="options" open>
+      <summary>Opções de conversão</summary>
+      <div class="opt-grid">
+        <fieldset>
+          <legend>JSON → CSV</legend>
+          <div class="row">
+            <div>
+              <label for="o-delim">Delimitador</label>
+              <select id="o-delim">
+                <option value=",">Vírgula ( , )</option>
+                <option value=";">Ponto e vírgula ( ; )</option>
+                <option value="tab">Tabulação</option>
+              </select>
+            </div>
+            <div>
+              <label for="o-arrays">Listas (arrays)</label>
+              <select id="o-arrays">
+                <option value="json">Texto JSON numa coluna</option>
+                <option value="index">Colunas itens.0, itens.1…</option>
+              </select>
+            </div>
+            <div>
+              <label for="o-eol">Fim de linha</label>
+              <select id="o-eol">
+                <option value="crlf">CRLF (padrão RFC 4180)</option>
+                <option value="lf">LF (Linux e macOS)</option>
+              </select>
+            </div>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="o-bom"> Incluir BOM UTF-8 no arquivo baixado (o Excel reconhece os acentos)</label>
+            <label class="check"><input type="checkbox" id="o-decimal"> Números com vírgula decimal (12,50)</label>
+            <label class="check"><input type="checkbox" id="o-formulas"> Proteger contra fórmulas: prefixa ' nos textos que começam com =, +, - ou @</label>
+          </div>
+          <button type="button" class="btn secondary small" id="preset-excel">Ajustar para o Excel em português</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>CSV → JSON</legend>
+          <div class="row">
+            <div>
+              <label for="i-delim">Delimitador</label>
+              <select id="i-delim">
+                <option value="auto">Detectar automaticamente</option>
+                <option value=",">Vírgula ( , )</option>
+                <option value=";">Ponto e vírgula ( ; )</option>
+                <option value="tab">Tabulação</option>
+                <option value="|">Barra vertical ( | )</option>
+              </select>
+            </div>
+            <div>
+              <label for="i-output">Formato de saída</label>
+              <select id="i-output">
+                <option value="array">Lista JSON (array)</option>
+                <option value="jsonl">JSON Lines (um registro por linha)</option>
+              </select>
+            </div>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="i-header" checked> A primeira linha é o cabeçalho</label>
+            <label class="check"><input type="checkbox" id="i-infer" checked> Detectar tipos: números, true/false e vazio → null</label>
+            <label class="check"><input type="checkbox" id="i-br"> Números no formato brasileiro (1.234,56)</label>
+            <label class="check"><input type="checkbox" id="i-nested" checked> Chaves com ponto viram objetos (endereco.cidade)</label>
+            <label class="check"><input type="checkbox" id="i-pretty" checked> Formatar o JSON com recuo</label>
+          </div>
+        </fieldset>
+      </div>
+    </details>
+
+    <div class="panes">
+      <section class="card pane" id="pane-json" aria-labelledby="t-json">
+        <div class="pane-head">
+          <h2 id="t-json"><label for="json">JSON</label></h2>
+          <div class="tools">
+            <label class="btn secondary small file-btn">Abrir arquivo<input type="file" id="file-json" class="file-input" accept=".json,.jsonl,.ndjson,.txt,application/json"></label>
+            <button type="button" class="btn secondary small" id="sample-json">Exemplo</button>
+            <button type="button" class="btn secondary small" id="copy-json">Copiar</button>
+            <button type="button" class="btn secondary small" id="down-json">Baixar</button>
+            <button type="button" class="btn secondary small" id="clear-json">Limpar</button>
+          </div>
+        </div>
+        <textarea id="json" class="code" spellcheck="false" wrap="off" autocomplete="off" aria-describedby="msg-json hint-json"></textarea>
+        <p class="hint" id="hint-json">Cole aqui ou arraste um arquivo .json ou .jsonl.</p>
+        <div class="msg" id="msg-json" aria-live="polite"></div>
+      </section>
+
+      <div class="arrows" role="group" aria-label="Direção da conversão">
+        <button type="button" class="btn" id="to-csv">JSON → CSV</button>
+        <button type="button" class="btn" id="to-json">CSV → JSON</button>
+      </div>
+
+      <section class="card pane" id="pane-csv" aria-labelledby="t-csv">
+        <div class="pane-head">
+          <h2 id="t-csv"><label for="csv">CSV</label></h2>
+          <div class="tools">
+            <label class="btn secondary small file-btn">Abrir arquivo<input type="file" id="file-csv" class="file-input" accept=".csv,.tsv,.txt,text/csv"></label>
+            <button type="button" class="btn secondary small" id="copy-csv">Copiar</button>
+            <button type="button" class="btn secondary small" id="down-csv">Baixar</button>
+            <button type="button" class="btn secondary small" id="clear-csv">Limpar</button>
+          </div>
+        </div>
+        <textarea id="csv" class="code" spellcheck="false" wrap="off" autocomplete="off" aria-describedby="msg-csv hint-csv"></textarea>
+        <p class="hint" id="hint-csv">Cole aqui ou arraste um arquivo .csv ou .tsv.</p>
+        <div class="msg" id="msg-csv" aria-live="polite"></div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="t-preview">
+      <h2 id="t-preview">Prévia da tabela</h2>
+      <p class="muted small" id="preview-info"></p>
+      <div class="table-wrap" tabindex="0" aria-label="Prévia da tabela, com rolagem">
+        <table class="preview" id="preview"></table>
+      </div>
+    </section>
+
+    <section class="card tips" aria-labelledby="t-tips">
+      <h2 id="t-tips">Bom saber</h2>
+      <ul>
+        <li><strong>Seus dados não saem daqui.</strong> A conversão acontece no seu navegador; nenhum arquivo é enviado. Só as opções ficam salvas neste aparelho.</li>
+        <li><strong>Excel em português:</strong> use ponto e vírgula, vírgula decimal e BOM UTF-8 (o botão “Ajustar para o Excel em português” faz isso). Sem o BOM, o Excel costuma mostrar os acentos errados.</li>
+        <li><strong>Objetos aninhados</strong> viram colunas com ponto (<code>endereco.cidade</code>); na volta, essas colunas viram objetos de novo. Listas podem ir como texto JSON (preserva tudo) ou em colunas indexadas (<code>itens.0</code>), melhor quando todas têm o mesmo tamanho.</li>
+        <li><strong>Vazio × texto vazio:</strong> <code>null</code> vira um campo vazio e <code>""</code> vira <code>""</code>, então a ida e volta preserva a diferença.</li>
+        <li><strong>Números do JSON</strong> vão para o CSV exatamente como foram escritos (<code>10.50</code> continua <code>10.50</code>). Na volta, códigos com zero à esquerda, CEP, CPF e números com mais de 15 dígitos continuam como texto.</li>
+        <li><strong>Arquivos de Excel antigo</strong> salvos em Windows-1252 são reconhecidos e lidos com os acentos certos.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Tudo roda no seu navegador. Código aberto no <a href="https://github.com/micdog22/conversor-json-csv">GitHub</a> · Licença MIT</p>
+  </footer>
+</body>
+</html>
